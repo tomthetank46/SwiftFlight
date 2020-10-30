@@ -31,7 +31,7 @@ s.dependency 'SwiftSocket', '~> 2.0.2'
 s.source_files = "SwiftFlight/**/*.{swift}"
 
 # 9
-s.resources = "SwiftFlight/**/*.{png,jpeg,jpg,storyboard,xib,xcassets}"
+# s.resources = "SwiftFlight/**/*.{png,jpeg,jpg,storyboard,xib,xcassets}"
 
 # 10
 s.swift_version = "5"
