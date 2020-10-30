@@ -456,11 +456,10 @@ class FlightControls: NSObject {
         return 500 * Float(Int(round(num / 500.0)))
     }
     
-//    public func updateValue(path: String, value: Any) {
-//        if let id = newConnectAPI.StateInfoDict[path]?.ID {
-//            newConnectAPI.StateByID[id]?.value = value
-//        }
-//        tabBarMotionController.statesToGet[path] = false
-//    }
+    public func updateValue(path: String, value: Any) {
+        if let id = newConnectAPI.StateInfoDict[path]?.ID {
+            newConnectAPI.StateByID[id]?.value = value
+        }
+    }
     
 }
