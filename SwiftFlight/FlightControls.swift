@@ -103,26 +103,26 @@ class FlightControls: NSObject {
     //virtualCockpitPan() takes two doubles, and moves the cockpit camera that number of radians in the x and y direction respectively
     public func virtualCockpitPan(x: Double, y: Double) {
 
-        if let currentCamera = newConnectAPI.StateInfoDict["infiniteflight/current_camera"]?.ID {
-            if let cameraName: String = newConnectAPI.StateByID[currentCamera]?.value as? String {
-                if cameraName == "NORMAL" || cameraName == "LOCKED" {
-                    cameraPan(x: Float(x), y: Float(y))
-                } else {
-                    let xToSend: Double = 0//cameraInfo.x! + x/100
-                    let yToSend: Double = 0//cameraInfo.y! + y/60
-                    let cameraNumber = newConnectAPI.cameraInfo[cameraName]?.number
-                    if let or = newConnectAPI.StateInfoDict["infiniteflight/cameras/\(String(cameraNumber!))/angle_override"]?.ID {
-                        newConnectAPI.setState(commandID: or, value: true)
-                    }
-                    if let xCommand = newConnectAPI.StateInfoDict["infiniteflight/cameras/\(String(cameraNumber!))/y_angle"]?.ID {
-                        newConnectAPI.setState(commandID: xCommand, value: xToSend)
-                    }
-                    if let yCommand = newConnectAPI.StateInfoDict["infiniteflight/cameras/\(String(cameraNumber!))/x_angle"]?.ID {
-                        newConnectAPI.setState(commandID: yCommand, value: yToSend)
-                    }
-                }
-            }
-        }
+//        if let currentCamera = newConnectAPI.StateInfoDict["infiniteflight/current_camera"]?.ID {
+//            if let cameraName: String = newConnectAPI.StateByID[currentCamera]?.value as? String {
+//                if cameraName == "NORMAL" || cameraName == "LOCKED" {
+//                    cameraPan(x: Float(x), y: Float(y))
+//                } else {
+//                    let xToSend: Double = 0//cameraInfo.x! + x/100
+//                    let yToSend: Double = 0//cameraInfo.y! + y/60
+//                    let cameraNumber = newConnectAPI.cameraInfo[cameraName]?.number
+//                    if let or = newConnectAPI.StateInfoDict["infiniteflight/cameras/\(String(cameraNumber!))/angle_override"]?.ID {
+//                        newConnectAPI.setState(commandID: or, value: true)
+//                    }
+//                    if let xCommand = newConnectAPI.StateInfoDict["infiniteflight/cameras/\(String(cameraNumber!))/y_angle"]?.ID {
+//                        newConnectAPI.setState(commandID: xCommand, value: xToSend)
+//                    }
+//                    if let yCommand = newConnectAPI.StateInfoDict["infiniteflight/cameras/\(String(cameraNumber!))/x_angle"]?.ID {
+//                        newConnectAPI.setState(commandID: yCommand, value: yToSend)
+//                    }
+//                }
+//            }
+//        }
     }
     
     //cameraReset() resets a panned POV (currently modded to go to previous camera)
@@ -456,11 +456,11 @@ class FlightControls: NSObject {
         return 500 * Float(Int(round(num / 500.0)))
     }
     
-    public func updateValue(path: String, value: Any) {
-        if let id = newConnectAPI.StateInfoDict[path]?.ID {
-            newConnectAPI.StateByID[id]?.value = value
-        }
-        tabBarMotionController.statesToGet[path] = false
-    }
+//    public func updateValue(path: String, value: Any) {
+//        if let id = newConnectAPI.StateInfoDict[path]?.ID {
+//            newConnectAPI.StateByID[id]?.value = value
+//        }
+//        tabBarMotionController.statesToGet[path] = false
+//    }
     
 }
