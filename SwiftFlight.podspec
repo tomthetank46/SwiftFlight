@@ -8,7 +8,7 @@ s.summary = "SwiftFlight lets a user interact with the Infinite Flight Simulator
 s.requires_arc = true
 
 # 2
-s.version = "0.1.3"
+s.version = "0.1.4"
 
 # 3
 s.license = { :type => "MIT", :file => "LICENSE" }
