@@ -1,13 +1,10 @@
 # SwiftFlight
----
 
 SwiftFlight provides a straightforward way to connect with Infinite Flight's Connect API v2.
 
 ## Installation
----
 
 ### CocoaPods
----
 
 SwiftFlight currently supports installation via CocoaPods.
 
@@ -25,7 +22,6 @@ end
 And then run `pod install`
 
 ## Code Examples:
----
 
 ### Create an instance of `NewConnectAPI` and pass it to `UDPReceiver` and `FlightControls` instances:
 ```
@@ -37,7 +33,6 @@ let flightControls = FlightControls(API: newConnectAPI)
 ```
 
 ### Send Commands and Set States:
----
 ```
 flightControls.trim(step: 5)
 flightControls.beacon(value: 0)
