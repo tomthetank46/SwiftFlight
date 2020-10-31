@@ -40,14 +40,12 @@ flightControls.speedToggle(value: true)
 ```
 
 ### Update States:
----
 ```
 let id = newConnectAPI.StateInfoDict["aircraft/0/systems/autopilot/vnav/on"]?.ID
 newConnectAPI.getState(ID: id)
 ```
 
 ### Look Up Values:
----
 ```
 let spoilers = newConnectAPI.StateInfoDict["aircraft/0/systems/spoilers/state"]?.ID
 let spoilersPos = newConnectAPI.StateByID[spoilers]?.value as? Int32 ?? 0
