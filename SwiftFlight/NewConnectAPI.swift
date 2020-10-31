@@ -37,13 +37,13 @@ public class CommandInfo {
     }
 }
 
-enum ConnectionStates: String {
+public enum ConnectionStates: String {
     case Looking = "Connecting to Infinite Flight..."
     case Connected = "Connected to Infinite Flight!"
     case Lost = "Connection Lost."
 }
 
-class NewConnectAPI: NSObject {
+public class NewConnectAPI: NSObject {
 
     let debug = false
     
@@ -80,7 +80,7 @@ class NewConnectAPI: NSObject {
     var inputStream: InputStream!
     var outputStream: OutputStream!
 
-    func setupNetworkCommunication(ip:String) {
+    internal func setupNetworkCommunication(ip:String) {
         var readStream: Unmanaged<CFReadStream>?
         var writeStream: Unmanaged<CFWriteStream>?
         
@@ -99,7 +99,7 @@ class NewConnectAPI: NSObject {
         status = ConnectionStates.Looking
     }
     
-    internal func setState(commandID: Int32, value: Bool) {
+    public func setState(commandID: Int32, value: Bool) {
         queue.async {
             self.sendInt(val: commandID)
             self.sendBool(val: true)
@@ -107,7 +107,7 @@ class NewConnectAPI: NSObject {
         }
     }
     
-    internal func setState(commandID: Int32, value: Int32) {
+    public func setState(commandID: Int32, value: Int32) {
         queue.async {
             self.sendInt(val: commandID)
             self.sendBool(val: true)
@@ -115,7 +115,7 @@ class NewConnectAPI: NSObject {
         }
     }
     
-    internal func setState(commandID: Int32, value: Float) {
+    public func setState(commandID: Int32, value: Float) {
         queue.async {
             self.sendInt(val: commandID)
             self.sendBool(val: true)
@@ -123,7 +123,7 @@ class NewConnectAPI: NSObject {
         }
     }
     
-    internal func setState(commandID: Int32, value: String) {
+    public func setState(commandID: Int32, value: String) {
         queue.async {
             self.sendInt(val: commandID)
             self.sendBool(val: true)
@@ -131,7 +131,7 @@ class NewConnectAPI: NSObject {
         }
     }
     
-    internal func setState(commandID: Int32, value: Double) {
+    public func setState(commandID: Int32, value: Double) {
         queue.async {
             self.sendInt(val: commandID)
             self.sendBool(val: true)
@@ -139,7 +139,7 @@ class NewConnectAPI: NSObject {
         }
     }
     
-    internal func setState(commandID: Int32, value: Int64) {
+    public func setState(commandID: Int32, value: Int64) {
         queue.async {
             self.sendInt(val: commandID)
             self.sendBool(val: true)
@@ -147,21 +147,21 @@ class NewConnectAPI: NSObject {
         }
     }
     
-    func getState(ID: Int32) {
+    public func getState(ID: Int32) {
         queue.async {
             self.sendInt(val: ID)
             self.sendBool(val: false)
         }
     }
     
-    func sendCommand(commandID: Int32) {
+    public func sendCommand(commandID: Int32) {
         queue.async {
             self.sendInt(val: commandID)
             self.sendBool(val: false)
         }
     }
     
-    func sendCommand(commandID: Int32, value: Int32) {
+    public func sendCommand(commandID: Int32, value: Int32) {
         queue.async {
             self.sendInt(val: commandID)
             self.sendBool(val: true)
@@ -169,7 +169,7 @@ class NewConnectAPI: NSObject {
         }
     }
     
-    func sendCommand(commandID: Int32, value: Bool) {
+    public func sendCommand(commandID: Int32, value: Bool) {
         queue.async {
             self.sendInt(val: commandID)
             self.sendBool(val: true)
@@ -177,7 +177,7 @@ class NewConnectAPI: NSObject {
         }
     }
     
-    func sendCommand(commandID: Int32, value: String) {
+    public func sendCommand(commandID: Int32, value: String) {
         queue.async {
             self.sendInt(val: commandID)
             self.sendBool(val: true)
@@ -186,7 +186,7 @@ class NewConnectAPI: NSObject {
         }
     }
     
-    func sendCommand(commandID: Int32, value: Float) {
+    public func sendCommand(commandID: Int32, value: Float) {
         queue.async {
             self.sendInt(val: commandID)
             self.sendBool(val: true)
@@ -205,7 +205,6 @@ class NewConnectAPI: NSObject {
                 return
             }
             self.outputStream.write(pointer, maxLength: data.count)
-            print(jsonData)
         }
     }
     
@@ -411,7 +410,7 @@ class NewConnectAPI: NSObject {
         refreshAllValues()
     }
     
-    func closeConnection() {
+    public func closeConnection() {
         if status == ConnectionStates.Connected {
             inputStream.close()
             outputStream.close()
@@ -423,7 +422,6 @@ class NewConnectAPI: NSObject {
             StateInfoDict.removeAll()
             States.removeAll()
             StateByID.removeAll()
-            print("all removed")
         }
     }
     
@@ -431,7 +429,7 @@ class NewConnectAPI: NSObject {
 
 extension NewConnectAPI: StreamDelegate {
     
-    func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
+    public func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
         if debug{print()}
         switch eventCode {
         case .hasBytesAvailable:
@@ -447,7 +445,7 @@ extension NewConnectAPI: StreamDelegate {
         case .openCompleted:
             print("open completed")
             self.status = ConnectionStates.Connected
-            newConnectAPI.sendCommand(commandID: -1)
+            self.sendCommand(commandID: -1)
         default:
             print("some other event... \(eventCode)")
         }

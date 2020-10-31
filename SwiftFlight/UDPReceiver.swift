@@ -9,39 +9,37 @@
 import Network
 import Foundation
 
-let newConnectAPI = NewConnectAPI()
-
-class UDPReceiver: NSObject {
+public class UDPReceiver {
     
-    var connected = false
+    public let newConnectAPI: NewConnectAPI?
+    public var connected: Bool
+    var connectAddress: String
     
-    var broadcastPort: UInt16 = 15000
-    var broadcastAddress: String = ""
-    var connectAddress = ""
-    var connectPort = 0
+    public init(API: NewConnectAPI) {
+        self.newConnectAPI = API
+        self.connected = false
+        self.connectAddress = ""
+    }
     
     var timer: Timer?
     
-    func networkTimer() {
-        timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(attemptNetworkSetup), userInfo: nil, repeats: true)
+    public func networkTimer() {
+        timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(self.attemptNetworkSetup), userInfo: nil, repeats: true)
     }
     
-    @objc func attemptNetworkSetup() {
+    @objc internal func attemptNetworkSetup() {
         if connectAddress.count > 0 {
-            if newConnectAPI.status == ConnectionStates.Looking {
-                newConnectAPI.setupNetworkCommunication(ip: connectAddress)
-//                if !(tabBarMotionController.newTimer?.isValid ?? false) {
-//                    tabBarMotionController.scheduledTimerWithTimeInterval()
-//                }
-                if newConnectAPI.status.rawValue == ConnectionStates.Connected.rawValue {
-                    timer?.invalidate()
-                }
+            if newConnectAPI?.status == ConnectionStates.Looking {
+                newConnectAPI?.setupNetworkCommunication(ip: connectAddress)
                 self.udpConnection?.cancel()
+            }
+            if newConnectAPI?.status == ConnectionStates.Connected {
+                timer?.invalidate()
             }
         }
     }
     
-    func reset() {
+    public func reset() {
         connectAddress = ""
         self.udpListener?.cancel()
     }
@@ -50,15 +48,13 @@ class UDPReceiver: NSObject {
     var udpConnection: NWConnection?
     var backgroundQueueUdpListener   = DispatchQueue.main
     
-    func findUDP() {
+    public func findUDP() {
         let params = NWParameters.udp
         udpListener = try? NWListener(using: params, on: 15000)
         
         udpListener?.service = NWListener.Service.init(type: "_flybywire._udp")
         
         self.udpListener?.stateUpdateHandler = { update in
-            print("update")
-            print(update)
             switch update {
             case .failed:
                 self.endConnection()
@@ -67,37 +63,36 @@ class UDPReceiver: NSObject {
             }
         }
         self.udpListener?.newConnectionHandler = { connection in
-            print("connection")
-            print(connection)
             self.createConnection(connection: connection)
             self.udpListener?.cancel()
         }
         udpListener?.start(queue: self.backgroundQueueUdpListener)
-        newConnectAPI.status = ConnectionStates.Looking
+        newConnectAPI?.status = ConnectionStates.Looking
     }
     
     func createConnection(connection: NWConnection) {
         self.udpConnection = connection
 
-            self.udpConnection?.stateUpdateHandler = { (newState) in
-                switch (newState) {
-                case .ready:
-                    print("ready")
+        self.udpConnection?.stateUpdateHandler = { (newState) in
+            switch (newState) {
+            case .ready:
+                print("ready")
 //                    self.send()
-                    self.receive()
-                case .setup:
-                    print("setup")
-                case .cancelled:
-                    print("cancelled")
-                    print(newState)
-                case .preparing:
-                    print("Preparing")
-                default:
-                    print("waiting or failed")
+                self.receive()
+            case .setup:
+                print("setup")
+            case .cancelled:
+                print("cancelled")
+                print(newState)
+            case .preparing:
+                print("Preparing")
+            default:
+                print("waiting or failed")
 
-                }
             }
-            self.udpConnection?.start(queue: .global())
+        }
+        self.udpConnection?.start(queue: .global())
+        self.networkTimer()
     }
     
     func endConnection() {
@@ -112,8 +107,6 @@ class UDPReceiver: NSObject {
 
     func receive() {
         self.udpConnection?.receiveMessage { (data, context, isComplete, error) in
-            print("Got it")
-            print(data as Any)
             do {
                 let jsonDictionary = try JSONSerialization.jsonObject(with: data!, options: []) as! [String : Any]
                 
@@ -128,9 +121,7 @@ class UDPReceiver: NSObject {
                             }
                         }
                         
-                        print(addresses)
                         self.udpConnection?.cancel()
-    //                        print(ipAddress)
                     }
                 }
             } catch let error {
