@@ -11,12 +11,12 @@ import Foundation
 
 public class UDPReceiver {
     
-    public let newConnectAPI: NewConnectAPI?
+    public let connectAPI: ConnectAPI?
     public var connected: Bool
     var connectAddress: String
     
-    public init(API: NewConnectAPI) {
-        self.newConnectAPI = API
+    public init(API: ConnectAPI) {
+        self.connectAPI = API
         self.connected = false
         self.connectAddress = ""
     }
@@ -29,11 +29,11 @@ public class UDPReceiver {
     
     @objc internal func attemptNetworkSetup() {
         if connectAddress.count > 0 {
-            if newConnectAPI?.status == ConnectionStates.Looking {
-                newConnectAPI?.setupNetworkCommunication(ip: connectAddress)
+            if connectAPI?.status == ConnectionStates.Looking {
+                connectAPI?.setupNetworkCommunication(ip: connectAddress)
                 self.udpConnection?.cancel()
             }
-            if newConnectAPI?.status == ConnectionStates.Connected {
+            if connectAPI?.status == ConnectionStates.Connected {
                 timer?.invalidate()
             }
         }
@@ -67,7 +67,7 @@ public class UDPReceiver {
             self.udpListener?.cancel()
         }
         udpListener?.start(queue: self.backgroundQueueUdpListener)
-        newConnectAPI?.status = ConnectionStates.Looking
+        connectAPI?.status = ConnectionStates.Looking
     }
     
     func createConnection(connection: NWConnection) {

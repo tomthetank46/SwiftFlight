@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		161F4A86DE0436FCFF668B83 /* libPods-SwiftFlight.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E5DFDB1DEF46816133EACCB5 /* libPods-SwiftFlight.a */; };
 		E2BE4C5D254B472F00F792A1 /* SwiftFlight.h in Headers */ = {isa = PBXBuildFile; fileRef = E2BE4C5B254B472F00F792A1 /* SwiftFlight.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		E2BE4C71254B532300F792A1 /* NewConnectAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2BE4C6F254B532300F792A1 /* NewConnectAPI.swift */; };
+		E2BE4C71254B532300F792A1 /* ConnectAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2BE4C6F254B532300F792A1 /* ConnectAPI.swift */; };
 		E2BE4C72254B532300F792A1 /* UDPReceiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2BE4C70254B532300F792A1 /* UDPReceiver.swift */; };
 		E2BE4C75254B832100F792A1 /* FlightControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2BE4C74254B832100F792A1 /* FlightControls.swift */; };
 /* End PBXBuildFile section */
@@ -20,7 +20,7 @@
 		E2BE4C58254B472E00F792A1 /* SwiftFlight.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftFlight.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E2BE4C5B254B472F00F792A1 /* SwiftFlight.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftFlight.h; sourceTree = "<group>"; };
 		E2BE4C5C254B472F00F792A1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		E2BE4C6F254B532300F792A1 /* NewConnectAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewConnectAPI.swift; sourceTree = "<group>"; };
+		E2BE4C6F254B532300F792A1 /* ConnectAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectAPI.swift; sourceTree = "<group>"; };
 		E2BE4C70254B532300F792A1 /* UDPReceiver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UDPReceiver.swift; sourceTree = "<group>"; };
 		E2BE4C74254B832100F792A1 /* FlightControls.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlightControls.swift; sourceTree = "<group>"; };
 		E5DFDB1DEF46816133EACCB5 /* libPods-SwiftFlight.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-SwiftFlight.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -77,7 +77,7 @@
 			isa = PBXGroup;
 			children = (
 				E2BE4C74254B832100F792A1 /* FlightControls.swift */,
-				E2BE4C6F254B532300F792A1 /* NewConnectAPI.swift */,
+				E2BE4C6F254B532300F792A1 /* ConnectAPI.swift */,
 				E2BE4C70254B532300F792A1 /* UDPReceiver.swift */,
 				E2BE4C5B254B472F00F792A1 /* SwiftFlight.h */,
 				E2BE4C5C254B472F00F792A1 /* Info.plist */,
@@ -191,7 +191,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E2BE4C72254B532300F792A1 /* UDPReceiver.swift in Sources */,
-				E2BE4C71254B532300F792A1 /* NewConnectAPI.swift in Sources */,
+				E2BE4C71254B532300F792A1 /* ConnectAPI.swift in Sources */,
 				E2BE4C75254B832100F792A1 /* FlightControls.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

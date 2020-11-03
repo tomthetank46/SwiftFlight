@@ -1,5 +1,5 @@
 //
-//  NewConnectAPI.swift
+//  ConnectAPI.swift
 //  InfiniteControl
 //
 //  Created by Thomas Hogrefe on 1/13/20.
@@ -43,9 +43,9 @@ public enum ConnectionStates: String {
     case Lost = "Connection Lost."
 }
 
-public class NewConnectAPI: NSObject {
+public class ConnectAPI: NSObject {
 
-    let debug = false
+    let debug = true
     
     public var status = ConnectionStates.Lost
     
@@ -410,6 +410,13 @@ public class NewConnectAPI: NSObject {
         refreshAllValues()
     }
     
+    public func getID(str: String) -> Int32 {
+        if let ID = StateInfoDict[str]?.ID {
+            return ID
+        }
+        return -1
+    }
+    
     public func closeConnection() {
         if status == ConnectionStates.Connected {
             inputStream.close()
@@ -427,7 +434,7 @@ public class NewConnectAPI: NSObject {
     
 }
 
-extension NewConnectAPI: StreamDelegate {
+extension ConnectAPI: StreamDelegate {
     
     public func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
         if debug{print()}
@@ -440,6 +447,7 @@ extension NewConnectAPI: StreamDelegate {
         case .errorOccurred:
             print("error occured")
             self.status = ConnectionStates.Lost
+            self.closeAll()
         case .hasSpaceAvailable:
             print("has space available")
         case .openCompleted:
