@@ -32,6 +32,18 @@ let udpReceiver = UDPReceiver(API: connectAPI)
 let flightControls = FlightControls(API: connectAPI)
 ```
 
+### Discover Infinite Flight UDP broadcasts on port `15000`:
+```
+udpReceiver.findUDP()
+```
+This will automatically set up a TCP connection to Infinite Flight, which can be accessed through the `ConnectAPI` class.
+
+### Setup a TCP connection with Infinite Flight directly:
+```
+connectAPI.setupNetworkCommunication(ip: "127.0.0.1")
+```
+This should be the IPv4 of the device running Infinite Flight.
+
 ### Send Commands and Set States:
 ```
 flightControls.trim(step: 5)
