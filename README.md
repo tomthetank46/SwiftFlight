@@ -15,7 +15,7 @@ source 'https://github.com/CocoaPods/Specs.git'
 source 'https://github.com/tomthetank46/PodSpecs'
 
 target 'InfiniteControl' do
-    pod 'SwiftFlight', '~> 0.1.6'
+    pod 'SwiftFlight', '~> 0.1.7'
 end
 ```
 
