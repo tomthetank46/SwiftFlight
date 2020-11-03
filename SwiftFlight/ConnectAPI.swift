@@ -45,7 +45,7 @@ public enum ConnectionStates: String {
 
 public class ConnectAPI: NSObject {
 
-    let debug = true
+    let debug = false
     
     public var status = ConnectionStates.Lost
     
