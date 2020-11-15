@@ -446,8 +446,7 @@ extension ConnectAPI: StreamDelegate {
             print("new message received: end")
         case .errorOccurred:
             print("error occured")
-            self.status = ConnectionStates.Lost
-            self.closeAll()
+            self.closeConnection()
         case .hasSpaceAvailable:
             print("has space available")
         case .openCompleted:
@@ -513,18 +512,9 @@ extension ConnectAPI: StreamDelegate {
 //                state?.value = "\(value)"
             } else {
                 if debug {print("invalid commandID: \(commandID)")}
-                self.status = ConnectionStates.Lost
-                closeAll()
+                closeConnection()
             }
         }
-    }
-    
-    private func closeAll() {
-        while inputStream.hasBytesAvailable {
-            let data = UnsafeMutablePointer<UInt8>.allocate(capacity: 1024)
-            inputStream.read(data, maxLength: 1024)
-        }
-        closeConnection()
     }
     
     private func getTypeFromInt(int: Int) -> String {
