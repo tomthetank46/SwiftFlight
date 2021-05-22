@@ -167,6 +167,25 @@ public class FlightControls: NSObject {
         }
     }
     
+    public func setCameraPosition(camera: Int, axis: String, offset: Double) {
+        let str = "infiniteflight/cameras/\(camera)/\(axis)_offset"
+        if let cameraOffset = connectAPI?.StateInfoDict[str]?.ID {
+            connectAPI?.setState(commandID: cameraOffset, value: offset)
+        }
+    }
+    
+    public func setCameraAngle(camera: Int, axis: String, angle: Double) {
+        if let cameraAngle = connectAPI?.getID(str: "infiniteflight/cameras/\(camera)/\(axis)_angle") {
+            print(angle)
+            connectAPI?.setState(commandID: cameraAngle, value: angle)
+        }
+    }
+    
+    public func setCameraOverride(camera: Int, value: Bool) {
+        if let angle_override = connectAPI?.getID(str: "infiniteflight/cameras/\(camera)/angle_override") {
+            connectAPI?.setState(commandID: angle_override, value: true)
+        }
+    }
     // MARK: - wheels and gear
     
     //brakes() takes no arguments, toggles the brakes.
