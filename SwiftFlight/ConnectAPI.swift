@@ -417,6 +417,13 @@ public class ConnectAPI: NSObject {
         return -1
     }
     
+    public func getStateValue(str: String) -> Any? {
+        if let id = StateInfoDict[str]?.ID {
+            return StateByID[id]?.value ?? nil
+        }
+        return nil
+    }
+    
     public func closeConnection() {
         if status == ConnectionStates.Connected {
             inputStream.close()
