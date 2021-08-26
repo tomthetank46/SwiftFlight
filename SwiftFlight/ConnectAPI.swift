@@ -427,6 +427,13 @@ public class ConnectAPI: NSObject {
         return nil
     }
     
+    public func isConnected() -> Bool {
+        if status == ConnectionStates.Connected {
+            return true
+        }
+        return false
+    }
+    
     public func closeConnection() {
         if status == ConnectionStates.Connected {
             inputStream.close()
