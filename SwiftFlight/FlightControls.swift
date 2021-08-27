@@ -105,28 +105,17 @@ public class FlightControls: NSObject {
     }
     
     //virtualCockpitPan() takes two doubles, and moves the cockpit camera that number of radians in the x and y direction respectively
-    public func virtualCockpitPan(x: Double, y: Double) {
-
-//        if let currentCamera = connectAPI?.StateInfoDict["infiniteflight/current_camera"]?.ID {
-//            if let cameraName: String = connectAPI?.StateByID[currentCamera]?.value as? String {
-//                if cameraName == "NORMAL" || cameraName == "LOCKED" {
-//                    cameraPan(x: Float(x), y: Float(y))
-//                } else {
-//                    let xToSend: Double = 0//cameraInfo.x! + x/100
-//                    let yToSend: Double = 0//cameraInfo.y! + y/60
-//                    let cameraNumber = connectAPI?.cameraInfo[cameraName]?.number
-//                    if let or = connectAPI?.StateInfoDict["infiniteflight/cameras/\(String(cameraNumber!))/angle_override"]?.ID {
-//                        connectAPI?.setState(commandID: or, value: true)
-//                    }
-//                    if let xCommand = connectAPI?.StateInfoDict["infiniteflight/cameras/\(String(cameraNumber!))/y_angle"]?.ID {
-//                        connectAPI?.setState(commandID: xCommand, value: xToSend)
-//                    }
-//                    if let yCommand = connectAPI?.StateInfoDict["infiniteflight/cameras/\(String(cameraNumber!))/x_angle"]?.ID {
-//                        connectAPI?.setState(commandID: yCommand, value: yToSend)
-//                    }
-//                }
-//            }
-//        }
+    public func virtualCockpitPan(x: Double, y: Double, cameraNumber: Int) {
+        
+        if let or = connectAPI?.StateInfoDict["infiniteflight/cameras/\(cameraNumber)/angle_override"]?.ID {
+            connectAPI?.setState(commandID: or, value: true)
+        }
+        if let xCommand = connectAPI?.StateInfoDict["infiniteflight/cameras/\(cameraNumber)/y_angle"]?.ID {
+            connectAPI?.setState(commandID: xCommand, value: x)
+        }
+        if let yCommand = connectAPI?.StateInfoDict["infiniteflight/cameras/\(cameraNumber)/x_angle"]?.ID {
+            connectAPI?.setState(commandID: yCommand, value: y)
+        }
     }
     
     //cameraReset() resets a panned POV (currently modded to go to previous camera)
