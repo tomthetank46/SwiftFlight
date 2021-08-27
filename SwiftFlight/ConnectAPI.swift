@@ -414,6 +414,9 @@ public class ConnectAPI: NSObject {
         if let ID = StateInfoDict[str]?.ID {
             return ID
         }
+        if let ID = CommandsDict[str]?.ID {
+            return ID
+        }
         return -1
     }
     
