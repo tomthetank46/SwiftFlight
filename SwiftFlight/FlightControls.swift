@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 
+@available(iOS 14.0, *)
 public class FlightControls: NSObject {
     
     let connectAPI: ConnectAPI?
