@@ -118,6 +118,18 @@ public class FlightControls: NSObject {
         }
     }
     
+    public func virtualCockpitTranslate(x: Double, y: Double, z: Double, cameraNumber: Int) {
+        if let xCommand = connectAPI?.StateInfoDict["infiniteflight/cameras/\(cameraNumber)/x_offset"]?.ID {
+            connectAPI?.setState(commandID: xCommand, value: x)
+        }
+        if let yCommand = connectAPI?.StateInfoDict["infiniteflight/cameras/\(cameraNumber)/y_offset"]?.ID {
+            connectAPI?.setState(commandID: yCommand, value: y)
+        }
+        if let zCommand = connectAPI?.StateInfoDict["infiniteflight/cameras/\(cameraNumber)/z_offset"]?.ID {
+            connectAPI?.setState(commandID: zCommand, value: z)
+        }
+    }
+    
     //cameraReset() resets a panned POV (currently modded to go to previous camera)
     public func cameraReset() {
         if let reset = connectAPI?.CommandsDict["commands/Reset"]?.ID {
