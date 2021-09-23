@@ -9,6 +9,7 @@
 import Network
 import Foundation
 
+@available(iOS 14.0, *)
 public class UDPReceiver {
     
     public let connectAPI: ConnectAPI?
@@ -30,10 +31,12 @@ public class UDPReceiver {
     @objc internal func attemptNetworkSetup() {
         if connectAddress.count > 0 {
             if connectAPI?.status == ConnectionStates.Looking {
+                self.connectAPI?.logger.notice("attempting connection to \(self.connectAddress)")
                 connectAPI?.setupNetworkCommunication(ip: connectAddress)
                 self.udpConnection?.cancel()
             }
             if connectAPI?.status == ConnectionStates.Connected {
+                self.connectAPI?.logger.notice("connected")
                 timer?.invalidate()
             }
         }
@@ -57,9 +60,10 @@ public class UDPReceiver {
         self.udpListener?.stateUpdateHandler = { update in
             switch update {
             case .failed:
+                self.connectAPI?.logger.notice("connection ended")
                 self.endConnection()
             default:
-                print("default update")
+                self.connectAPI?.logger.notice("default update")
             }
         }
         self.udpListener?.newConnectionHandler = { connection in
@@ -76,18 +80,18 @@ public class UDPReceiver {
         self.udpConnection?.stateUpdateHandler = { (newState) in
             switch (newState) {
             case .ready:
-                print("ready")
+                self.connectAPI?.logger.notice("udp ready")
 //                    self.send()
                 self.receive()
             case .setup:
-                print("setup")
+                self.connectAPI?.logger.notice("udp setup")
             case .cancelled:
-                print("cancelled")
-                print(newState)
+                self.connectAPI?.logger.notice("udp cancelled")
+                self.connectAPI?.logger.notice("udp \(String(describing: newState))")
             case .preparing:
-                print("Preparing")
+                self.connectAPI?.logger.notice("udp Preparing")
             default:
-                print("waiting or failed")
+                self.connectAPI?.logger.notice("udp waiting or failed")
 
             }
         }
@@ -109,6 +113,7 @@ public class UDPReceiver {
         self.udpConnection?.receiveMessage { (data, context, isComplete, error) in
             do {
                 let jsonDictionary = try JSONSerialization.jsonObject(with: data!, options: []) as! [String : Any]
+                self.connectAPI?.logger.notice("received \(jsonDictionary)")
                 
                 if (jsonDictionary["Addresses"] != nil) {
                     if (jsonDictionary["Addresses"] is NSArray) {
@@ -117,15 +122,16 @@ public class UDPReceiver {
                         for i in addresses {
                             let ipAddress:String = i as! String
                             if (ipAddress.range(of: "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$", options: .regularExpression) != nil) {
+                                self.connectAPI?.logger.notice("ip received: \(String(describing: ipAddress))")
                                 self.connectAddress = ipAddress
                             }
                         }
-                        
+                        self.connectAPI?.logger.notice("udp connection cancelled")
                         self.udpConnection?.cancel()
                     }
                 }
             } catch let error {
-                print(error)
+                self.connectAPI?.logger.error("\(String(describing: error))")
             }
         }
     }

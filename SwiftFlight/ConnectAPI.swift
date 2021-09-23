@@ -8,6 +8,7 @@
 
 import UIKit
 import SwiftSocket
+import OSLog
 
 public struct StateInfo {
     public let path: String?
@@ -43,9 +44,12 @@ public enum ConnectionStates: String {
     case Lost = "Connection Lost."
 }
 
+@available(iOS 14.0, *)
 public class ConnectAPI: NSObject {
 
     let debug = false
+    
+    let logger = Logger()
     
     public var status = ConnectionStates.Lost
     
@@ -201,7 +205,7 @@ public class ConnectAPI: NSObject {
         
         data.withUnsafeBytes {
             guard let pointer = $0.baseAddress?.assumingMemoryBound(to: Byte.self) else {
-                print("Error sending command")
+                logger.error("Error sending command: \(val)")
                 return
             }
             self.outputStream.write(pointer, maxLength: data.count)
@@ -215,7 +219,7 @@ public class ConnectAPI: NSObject {
         
         data.withUnsafeBytes {
             guard let pointer = $0.baseAddress?.assumingMemoryBound(to: Byte.self) else {
-                print("Error sending command")
+                logger.error("Error sending command: \(val)")
                 return
             }
             self.outputStream.write(pointer, maxLength: data.count)
@@ -229,7 +233,7 @@ public class ConnectAPI: NSObject {
         
         data.withUnsafeBytes {
             guard let pointer = $0.baseAddress?.assumingMemoryBound(to: Byte.self) else {
-                print("Error sending command")
+                logger.error("Error sending command: \(val)")
                 return
             }
             self.outputStream.write(pointer, maxLength: data.count)
@@ -243,7 +247,7 @@ public class ConnectAPI: NSObject {
         
         data.withUnsafeBytes {
             guard let pointer = $0.baseAddress?.assumingMemoryBound(to: Byte.self) else {
-                print("Error sending command")
+                logger.error("Error sending command: \(val)")
                 return
             }
             self.outputStream.write(pointer, maxLength: data.count)
@@ -257,7 +261,7 @@ public class ConnectAPI: NSObject {
         
         data.withUnsafeBytes {
             guard let pointer = $0.baseAddress?.assumingMemoryBound(to: Byte.self) else {
-                print("Error sending command")
+                logger.error("Error sending command: \(val)")
                 return
             }
             self.outputStream.write(pointer, maxLength: data.count)
@@ -271,7 +275,7 @@ public class ConnectAPI: NSObject {
         
         data.withUnsafeBytes {
             guard let pointer = $0.baseAddress?.assumingMemoryBound(to: Byte.self) else {
-                print("Error sending command")
+                logger.error("Error sending command: \(val)")
                 return
             }
             self.outputStream.write(pointer, maxLength: data.count)
@@ -285,7 +289,7 @@ public class ConnectAPI: NSObject {
         
         data.withUnsafeBytes {
             guard let pointer = $0.baseAddress?.assumingMemoryBound(to: Byte.self) else {
-                print("Error sending command")
+                logger.error("Error sending command: \(val)")
                 return
             }
             self.outputStream.write(pointer, maxLength: data.count)
@@ -363,11 +367,11 @@ public class ConnectAPI: NSObject {
         let data = UnsafeMutablePointer<UInt8>.allocate(capacity: Int(size))
         var totalRead = 0
         var sizeToRead = Int(size)
-        if debug == true { print("size to read \(sizeToRead)") }
+        logger.debug("size to read \(sizeToRead)")
         
         while totalRead != Int(size) {
             let read = inputStream.read(&data[totalRead], maxLength: sizeToRead)
-            if debug == true { print("Read \(read) (out of \(sizeToRead)).") }
+            logger.debug("Read \(read) (out of \(sizeToRead)).")
             sizeToRead -= read
             totalRead += read
         }
@@ -381,11 +385,11 @@ public class ConnectAPI: NSObject {
     }
     
     func readManifest(inputStream: InputStream) {
-        print("Reading manifest...")
+        logger.info("Reading manifest...")
         let str = readString(inputStream: inputStream)
         
         let lines = str.components(separatedBy: "\n")
-        print("States: \(lines).")
+        logger.debug("States: \(lines).")
         
         for i in 0...lines.count-1 {
             let items = lines[i].components(separatedBy: ",")
@@ -451,27 +455,27 @@ public class ConnectAPI: NSObject {
     
 }
 
+@available(iOS 14.0, *)
 extension ConnectAPI: StreamDelegate {
     
     public func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
-        if debug{print()}
         switch eventCode {
         case .hasBytesAvailable:
-            if debug {print("new message received: bytes")}
+            logger.debug("new message received: bytes")
             readCommand(stream: aStream as! InputStream)
         case .endEncountered:
-            print("new message received: end")
+            logger.info("new message received: end")
         case .errorOccurred:
-            print("error occured")
+            logger.debug("error occured")
             self.closeConnection()
         case .hasSpaceAvailable:
-            print("has space available")
+            logger.info("has space available")
         case .openCompleted:
-            print("open completed")
+            logger.info("open completed")
             self.status = ConnectionStates.Connected
             self.sendCommand(commandID: -1)
         default:
-            print("some other event... \(eventCode)")
+            logger.info("some other event...")
         }
     }
     
@@ -480,7 +484,7 @@ extension ConnectAPI: StreamDelegate {
         let commandID = readInt(inputStream: stream)
         let dataLength = readInt(inputStream: stream)
         
-        if debug {print("commandID \(commandID), length \(dataLength)")}
+        logger.debug("commandID \(commandID), length \(dataLength)")
         
         if commandID == -1 {
             readManifest(inputStream: inputStream)
@@ -488,36 +492,36 @@ extension ConnectAPI: StreamDelegate {
             let stateInfo = StateInfoByID[commandID]
             let state = StateByID[commandID]
             
-            if debug {print("ID \(String(describing: stateInfo?.ID)) Type \(getTypeFromInt(int: (stateInfo?.type) ?? -1)), State \(String(describing: stateInfo?.path))")}
+            logger.debug("ID \(String(describing: stateInfo?.ID)) Type \(self.getTypeFromInt(int: (stateInfo?.type) ?? -1)), State \(String(describing: stateInfo?.path))")
             
             if stateInfo?.type == 0 {    //bool
                 let value = readBoolean(inputStream: inputStream)
-                if debug {print("\(String(describing: stateInfo?.path)): \(value)")}
+                logger.debug("\(String(describing: stateInfo?.path)): \(value)")
                 state?.value = value as Bool
                 
             } else if stateInfo?.type == 1 {    //int
                 let value = readInt(inputStream: inputStream)
-                if debug {print("\(String(describing: stateInfo?.path)): \(value)")}
+                logger.debug("\(String(describing: stateInfo?.path)): \(value)")
                 state?.value = value as Int32
                 
             } else if stateInfo?.type == 2 {    //float
                 let value = readFloat(inputStream: inputStream)
-                if debug {print("\(String(describing: stateInfo?.path)): \(value)")}
+                logger.debug("\(String(describing: stateInfo?.path)): \(value)")
                 state?.value = value as Float
                 
             } else if stateInfo?.type == 3 {    //double
                 let value = readDouble(inputStream: inputStream)
-                if debug {print("\(String(describing: stateInfo?.path)): \(value)")}
+                logger.debug("\(String(describing: stateInfo?.path)): \(value)")
                 state?.value = value as Double
                 
             } else if stateInfo?.type == 4 {    //string
                 let value = readString(inputStream: inputStream)
-                if debug {print("\(String(describing: stateInfo?.path)): \(value)")}
+                logger.debug("\(String(describing: stateInfo?.path)): \(String(describing: value))")
                 state?.value = "\(value)"
                 
             } else if stateInfo?.type == 5 {    //long
                 let value = readLong(inputStream: inputStream)
-                if debug {print("\(String(describing: stateInfo?.path)): \(value)")}
+                logger.debug("\(String(describing: stateInfo?.path)): \(value)")
                 state?.value = value as Int64
             } else if stateInfo?.type == -1 { //sound?
 //                let value = readString(inputStream: inputStream)
@@ -528,7 +532,7 @@ extension ConnectAPI: StreamDelegate {
 //                }
 //                state?.value = "\(value)"
             } else {
-                if debug {print("invalid commandID: \(commandID)")}
+                logger.debug("invalid commandID: \(commandID)")
                 closeConnection()
             }
         }

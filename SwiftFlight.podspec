@@ -2,7 +2,7 @@ Pod::Spec.new do |s|
 
 # 1
 s.platform = :ios
-s.ios.deployment_target = '13.0'
+s.ios.deployment_target = '14.0'
 s.name = "SwiftFlight"
 s.summary = "SwiftFlight lets a user interact with the Infinite Flight Simulator Connect API."
 s.requires_arc = true
