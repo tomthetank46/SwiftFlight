@@ -12,6 +12,7 @@
 		E2BE4C71254B532300F792A1 /* ConnectAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2BE4C6F254B532300F792A1 /* ConnectAPI.swift */; };
 		E2BE4C72254B532300F792A1 /* UDPReceiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2BE4C70254B532300F792A1 /* UDPReceiver.swift */; };
 		E2BE4C75254B832100F792A1 /* FlightControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2BE4C74254B832100F792A1 /* FlightControls.swift */; };
+		E2DC08D0280F8AE100CE8094 /* TimedState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2DC08CF280F8AE000CE8094 /* TimedState.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -23,6 +24,7 @@
 		E2BE4C6F254B532300F792A1 /* ConnectAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectAPI.swift; sourceTree = "<group>"; };
 		E2BE4C70254B532300F792A1 /* UDPReceiver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UDPReceiver.swift; sourceTree = "<group>"; };
 		E2BE4C74254B832100F792A1 /* FlightControls.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlightControls.swift; sourceTree = "<group>"; };
+		E2DC08CF280F8AE000CE8094 /* TimedState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimedState.swift; sourceTree = "<group>"; };
 		E5DFDB1DEF46816133EACCB5 /* libPods-SwiftFlight.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-SwiftFlight.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -79,6 +81,7 @@
 				E2BE4C74254B832100F792A1 /* FlightControls.swift */,
 				E2BE4C6F254B532300F792A1 /* ConnectAPI.swift */,
 				E2BE4C70254B532300F792A1 /* UDPReceiver.swift */,
+				E2DC08CF280F8AE000CE8094 /* TimedState.swift */,
 				E2BE4C5B254B472F00F792A1 /* SwiftFlight.h */,
 				E2BE4C5C254B472F00F792A1 /* Info.plist */,
 			);
@@ -193,6 +196,7 @@
 				E2BE4C72254B532300F792A1 /* UDPReceiver.swift in Sources */,
 				E2BE4C71254B532300F792A1 /* ConnectAPI.swift in Sources */,
 				E2BE4C75254B832100F792A1 /* FlightControls.swift in Sources */,
+				E2DC08D0280F8AE100CE8094 /* TimedState.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -16,11 +16,6 @@ public class FlightControls: NSObject {
     public init(API: ConnectAPI) {
         self.connectAPI = API
     }
-    // MARK: - variables
-    
-    public let impact = UIImpactFeedbackGenerator()
-    public let selection = UISelectionFeedbackGenerator()
-    public let notification = UINotificationFeedbackGenerator()
     
     // MARK: - Axes
     
@@ -34,7 +29,6 @@ public class FlightControls: NSObject {
         if let throttleCommand = connectAPI?.StateInfoDict["api_joystick/axes/3/value"]?.ID {
             connectAPI?.setState(commandID: throttleCommand, value: Int32(-(val - 1024)))
         }
-        updateValue(path: "aircraft/0/systems/engines/0/throttle_lever", value: val / 2048)
     }
     
     // MARK: - Flight Controls
@@ -43,9 +37,6 @@ public class FlightControls: NSObject {
     public func speedbrakes(pos: Int) {
         if let spoilers = connectAPI?.StateInfoDict["aircraft/0/systems/spoilers/state"]?.ID {
             connectAPI?.setState(commandID: spoilers, value: Int32(pos))
-            connectAPI?.getState(ID: spoilers)
-            selection.selectionChanged()
-            updateValue(path: "aircraft/0/systems/spoilers/state", value: pos)
         }
     }
     
@@ -56,9 +47,6 @@ public class FlightControls: NSObject {
         }
         let flapsPosition = connectAPI?.StateByID[flaps]?.value as? Int32 ?? 0
         connectAPI?.setState(commandID: flaps, value: flapsPosition + Int32(direction))
-        selection.selectionChanged()
-        updateValue(path: "aircraft/0/systems/flaps/state", value: flapsPosition + Int32(direction))
-        connectAPI?.getState(ID: flaps)
     }
     
     //trim() takes an integer and steps the trim that many percent
@@ -78,7 +66,6 @@ public class FlightControls: NSObject {
                 connectAPI?.sendCommand(commandID: trim)
             }
         }
-        selection.selectionChanged()
     }
     
     // MARK: - Throttle
@@ -89,8 +76,6 @@ public class FlightControls: NSObject {
         if let rev = connectAPI?.StateInfoDict["aircraft/0/systems/reverse/state"]?.ID {
             connectAPI?.setState(commandID: rev, value: state)
         }
-        updateValue(path: "aircraft/0/systems/reverse/state", value: state)
-        selection.selectionChanged()
     }
     
     // MARK: - Cameras
@@ -190,33 +175,31 @@ public class FlightControls: NSObject {
     }
     // MARK: - wheels and gear
     
-    //brakes() takes no arguments, toggles the brakes.
-    public func brakes() {
-        guard let brakesCommand = connectAPI?.CommandsDict["commands/ParkingBrakes"]?.ID else {
+    //brakes() takes a boolean and sets the brakes accordingly.
+    public func brakes(value: Bool) {
+        guard let brakes = connectAPI?.StateInfoDict["aircraft/0/systems/parking_brake/state"]?.ID else {
             return
         }
-        connectAPI?.sendCommand(commandID: brakesCommand)
-        selection.selectionChanged()
+        connectAPI?.setState(commandID: brakes, value: value)
     }
     
-    //gear() takes no arguments and toggles the gear
-    public func gear() {
+    //gear() takes a boolean and sets the landing gear to the correct state
+    public func gear(value: Bool) {
+        guard let lever = connectAPI?.StateInfoDict["aircraft/0/systems/landing_gear/lever_state"]?.ID else {
+            return
+        }
         guard let gearCommand = connectAPI?.CommandsDict["commands/LandingGear"]?.ID else {
             return
         }
         connectAPI?.sendCommand(commandID: gearCommand)
-        guard let gear = connectAPI?.StateInfoDict["aircraft/0/systems/landing_gear/state"]?.ID else {
-            return
-        }
-        notification.notificationOccurred(.success)
-        connectAPI?.getState(ID: gear)
+        connectAPI?.updateState(commandID: lever, value: value)
+        // this is a little bit of a hack while aircraft/0/systems/landing_gear/lever_state is broken
     }
     
     //push() takes no arguments and toggles pushback
     public func push() {
         if let pb = connectAPI?.CommandsDict["commands/Pushback"]?.ID {
             connectAPI?.sendCommand(commandID: pb)
-            selection.selectionChanged()
         }
     }
     
@@ -227,9 +210,6 @@ public class FlightControls: NSObject {
             return
         }
         connectAPI?.setState(commandID: nav, value: Int32(value))
-        connectAPI?.getState(ID: nav)
-        selection.selectionChanged()
-        updateValue(path: "aircraft/0/systems/electrical_switch/nav_lights_switch/state", value: value)
     }
     
     public func beacon(value: Int) {
@@ -237,9 +217,6 @@ public class FlightControls: NSObject {
             return
         }
         connectAPI?.setState(commandID: beacon, value: Int32(value))
-        connectAPI?.getState(ID: beacon)
-        selection.selectionChanged()
-        updateValue(path: "aircraft/0/systems/electrical_switch/beacon_lights_switch/state", value: value)
     }
     
     public func strobe(value: Int) {
@@ -247,9 +224,6 @@ public class FlightControls: NSObject {
             return
         }
         connectAPI?.setState(commandID: strobe, value: Int32(value))
-        connectAPI?.getState(ID: strobe)
-        selection.selectionChanged()
-        updateValue(path: "aircraft/0/systems/electrical_switch/strobe_lights_switch/state", value: value)
     }
     
     public func landing(value: Int) {
@@ -257,9 +231,6 @@ public class FlightControls: NSObject {
             return
         }
         connectAPI?.setState(commandID: landing, value: Int32(value))
-        connectAPI?.getState(ID: landing)
-        selection.selectionChanged()
-        updateValue(path: "aircraft/0/systems/electrical_switch/landing_lights_switch/state", value: value)
     }
     
     // Autopilot
@@ -267,25 +238,18 @@ public class FlightControls: NSObject {
     public func apToggle() {
         if let ap = connectAPI?.CommandsDict["commands/Autopilot.Toggle"]?.ID {
             connectAPI?.sendCommand(commandID: ap)
-            notification.notificationOccurred(.warning)
         }
     }
     
     public func apNavToggle(value: Bool) {
         if let nav = connectAPI?.StateInfoDict["aircraft/0/systems/autopilot/nav/on"]?.ID {
             connectAPI?.setState(commandID: nav, value: !value)
-            connectAPI?.getState(ID: nav)
-            selection.selectionChanged()
-            self.updateValue(path: "aircraft/0/systems/autopilot/nav/on", value: value)
         }
     }
     
     public func vnavToggle(value: Bool) {
         if let vnav = connectAPI?.StateInfoDict["aircraft/0/systems/autopilot/vnav/on"]?.ID {
             connectAPI?.setState(commandID: vnav, value: !value)
-            connectAPI?.getState(ID: vnav)
-            selection.selectionChanged()
-            self.updateValue(path: "aircraft/0/systems/autopilot/vnav/on", value: value)
         }
     }
     
@@ -293,18 +257,7 @@ public class FlightControls: NSObject {
         guard let hdg = connectAPI?.StateInfoDict["aircraft/0/systems/autopilot/hdg/on"]?.ID else {
             return
         }
-        guard let target = connectAPI?.StateInfoDict["aircraft/0/systems/autopilot/hdg/target"]?.ID else {
-            return
-        }
-        guard let current = connectAPI?.StateInfoDict["aircraft/0/heading_magnetic"]?.ID else {
-            return
-        }
-        let currentValue: Float = connectAPI?.StateByID[current]?.value as! Float
-        connectAPI?.setState(commandID: target, value: currentValue)
         connectAPI?.setState(commandID: hdg, value: !value)
-        connectAPI?.getState(ID: hdg)
-        selection.selectionChanged()
-        self.updateValue(path: "aircraft/0/systems/autopilot/hdg/on", value: value)
     }
     
     public func stepHeading(step: Int) {
@@ -314,8 +267,13 @@ public class FlightControls: NSObject {
             if newValDeg < 1 { newValDeg += 360 }
             let newValRad: Float = degToRad(newValDeg)
             connectAPI?.setState(commandID: cmd, value: newValRad)
-            selection.selectionChanged()
-            connectAPI?.getState(ID: cmd)
+        }
+    }
+    
+    public func setHeading(value: Int) {
+        if let command = connectAPI?.StateInfoDict["aircraft/0/systems/autopilot/hdg/target"]?.ID {
+            let valueRadians: Float = degToRad(Float(value))
+            connectAPI?.setState(commandID: command, value: valueRadians)
         }
     }
     
@@ -323,28 +281,7 @@ public class FlightControls: NSObject {
         guard let spd = connectAPI?.StateInfoDict["aircraft/0/systems/autopilot/spd/on"]?.ID else {
             return
         }
-        guard let target = connectAPI?.StateInfoDict["aircraft/0/systems/autopilot/spd/target"]?.ID else {
-            return
-        }
-        
-        var current: Int32 = 0
-        
-        guard let altitude: Float = ((connectAPI?.StateByID[(connectAPI?.StateInfoDict["aircraft/0/altitude_msl"]?.ID)!]?.value ?? 0)) as? Float else {
-                return
-        }
-        if  altitude < 28000 {
-            current = connectAPI?.StateInfoDict["aircraft/0/indicated_airspeed"]?.ID ?? 0
-        } else {
-            current = connectAPI?.StateInfoDict["aircraft/0/mach_speed"]?.ID ?? 0
-        }
-        
-        let currentValue: Float = connectAPI?.StateByID[current]?.value as! Float
-        
-        connectAPI?.setState(commandID: target, value: currentValue)
         connectAPI?.setState(commandID: spd, value: !value)
-        connectAPI?.getState(ID: spd)
-        selection.selectionChanged()
-        self.updateValue(path: "aircraft/0/systems/autopilot/spd/on", value: value)
     }
     
     public func stepSpeed(step: Float) {
@@ -365,16 +302,25 @@ public class FlightControls: NSObject {
                 connectAPI?.getState(ID: cmd)
                 
             }
-            selection.selectionChanged()
+        }
+    }
+    
+    public func setSpeedKnots(value: Int) {
+        if let command = connectAPI?.StateInfoDict["aircraft/0/systems/autopilot/spd/target"]?.ID {
+            let valueMPS: Float = knotsToIFSpd(Float(value))
+            connectAPI?.setState(commandID: command, value: valueMPS)
+        }
+    }
+    
+    public func setSpeedMach(value: Float) {
+        if let command = connectAPI?.StateInfoDict["aircraft/0/systems/autopilot/spd/target"]?.ID {
+            connectAPI?.setState(commandID: command, value: value)
         }
     }
     
     public func altitudeToggle(value: Bool) {
         if let alt =  connectAPI?.StateInfoDict["aircraft/0/systems/autopilot/alt/on"]?.ID {
             connectAPI?.setState(commandID: alt, value: !value)
-            connectAPI?.getState(ID: alt)
-            selection.selectionChanged()
-            self.updateValue(path: "aircraft/0/systems/autopilot/alt/on", value: value)
         }
     }
     
@@ -384,8 +330,13 @@ public class FlightControls: NSObject {
             var newVal: Float = feetToIFAlt(roundToHundreds(currVal + Float(step)))
             if newVal < 0 { newVal = 0 }
             connectAPI?.setState(commandID: cmd, value: newVal)
-            selection.selectionChanged()
-            connectAPI?.getState(ID: cmd)
+        }
+    }
+    
+    public func setAltitude(value: Int) {
+        if let cmd = connectAPI?.StateInfoDict["aircraft/0/systems/autopilot/alt/target"]?.ID {
+            let valueMeters = feetToIFAlt(Float(value))
+            connectAPI?.setState(commandID: cmd, value: valueMeters)
         }
     }
     
@@ -393,18 +344,7 @@ public class FlightControls: NSObject {
         guard let vs = connectAPI?.StateInfoDict["aircraft/0/systems/autopilot/vs/on"]?.ID else {
             return
         }
-        guard let target = connectAPI?.StateInfoDict["aircraft/0/systems/autopilot/vs/target"]?.ID else {
-            return
-        }
-        guard let current = connectAPI?.StateInfoDict["aircraft/0/vertical_speed"]?.ID else {
-            return
-        }
-        let currentValue: Float = ifAltToFeet(connectAPI?.StateByID[current]?.value as! Float)
-        connectAPI?.setState(commandID: target, value: 60 * feetToIFAlt(currentValue))
         connectAPI?.setState(commandID: vs, value: !value)
-        connectAPI?.getState(ID: vs)
-        selection.selectionChanged()
-        self.updateValue(path: "aircraft/0/systems/autopilot/vs/on", value: value)
     }
     
     public func stepVS(step: Int) {
@@ -412,8 +352,13 @@ public class FlightControls: NSObject {
             let currVal: Float = ifAltToFeet(connectAPI?.StateByID[cmd]?.value as! Float)
             let newVal: Float = feetToIFAlt(roundToHundreds(currVal + Float(step)))
             connectAPI?.setState(commandID: cmd, value: newVal)
-            selection.selectionChanged()
-            connectAPI?.getState(ID: cmd)
+        }
+    }
+    
+    public func setVerticalSpeed(value: Int) {
+        if let cmd = connectAPI?.StateInfoDict["aircraft/0/systems/autopilot/vs/target"]?.ID {
+            let valueMeters = feetToIFAlt(Float(value))
+            connectAPI?.setState(commandID: cmd, value: valueMeters)
         }
     }
     
@@ -422,8 +367,6 @@ public class FlightControls: NSObject {
             let currVal: Float = connectAPI?.StateByID[cmd]?.value as! Float
             let newVal: Float = currVal + step
             connectAPI?.setState(commandID: cmd, value: newVal)
-            connectAPI?.getState(ID: cmd)
-            selection.selectionChanged()
         }
     }
     
@@ -441,14 +384,12 @@ public class FlightControls: NSObject {
     public func openATCWindow() {
         if let window = connectAPI?.CommandsDict["commands/ShowATCWindowCommand"]?.ID {
             connectAPI?.sendCommand(commandID: window)
-            selection.selectionChanged()
         }
     }
     
     public func atcEntry(num: Int) {
         if let atc = connectAPI?.CommandsDict["commands/ATCEntry\(num)"]?.ID {
             connectAPI?.sendCommand(commandID: atc)
-            selection.selectionChanged()
         }
     }
     
@@ -479,12 +420,6 @@ public class FlightControls: NSObject {
     }
     public func roundToFiveHundreds(_ num: Float) -> Float {
         return 500 * Float(Int(round(num / 500.0)))
-    }
-    
-    public func updateValue(path: String, value: Any) {
-        if let id = connectAPI?.StateInfoDict[path]?.ID {
-            connectAPI?.StateByID[id]?.value = value
-        }
     }
     
 }
