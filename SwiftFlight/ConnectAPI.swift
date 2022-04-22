@@ -61,8 +61,10 @@ public class ConnectAPI: NSObject {
     public var StateInfoDict: Dictionary<String, StateInfo> = [:]
     public var States: [State] = []
     public var StateByID: Dictionary<Int32, State> = [:]
-//    public var cameraInfo: Dictionary<String, CameraInfo> = [:]
-//    public var cameraNameByNumber: Dictionary<Substring, String> = [:]
+    
+    private var requestedStates: [TimedState] = []  // queue, keeps track of when states are requested
+    private var updatedStates: Dictionary<Int32, Int> = [:]    // track when states are updated
+    // These let us discard outdated info later. We'll want to ignore any state info we've edited since requesting the info.
     
     let queue: DispatchQueue = DispatchQueue(label: "api-queue", qos: .userInteractive)
     
@@ -72,7 +74,10 @@ public class ConnectAPI: NSObject {
                 //don't get states from other aircraft
                 let pathArray = item.path?.split(separator: "/")
                 if !((pathArray?[0] == "aircraft") && ((pathArray?[1].count)! > 1)) {
-                    getState(ID: item.ID!)
+                    // don't get sounds
+                    if !(item.type == -1) {
+                        getState(ID: item.ID!)
+                    }
                 }
             }
         }
@@ -103,12 +108,18 @@ public class ConnectAPI: NSObject {
         status = ConnectionStates.Looking
     }
     
+    public func updateState(commandID: Int32, value: Any) {
+        StateByID[commandID]?.value = value
+        self.updatedStates[commandID] = Int(1000 * Date().timeIntervalSince1970)
+    }
+    
     public func setState(commandID: Int32, value: Bool) {
         queue.async {
             self.sendInt(val: commandID)
             self.sendBool(val: true)
             self.sendBool(val: value)
         }
+        updateState(commandID: commandID, value: value)
     }
     
     public func setState(commandID: Int32, value: Int32) {
@@ -117,6 +128,7 @@ public class ConnectAPI: NSObject {
             self.sendBool(val: true)
             self.sendInt(val: value)
         }
+        updateState(commandID: commandID, value: value)
     }
     
     public func setState(commandID: Int32, value: Float) {
@@ -125,6 +137,7 @@ public class ConnectAPI: NSObject {
             self.sendBool(val: true)
             self.sendFloat(val: value)
         }
+        updateState(commandID: commandID, value: value)
     }
     
     public func setState(commandID: Int32, value: String) {
@@ -133,6 +146,7 @@ public class ConnectAPI: NSObject {
             self.sendBool(val: true)
             self.sendString(val: value)
         }
+        updateState(commandID: commandID, value: value)
     }
     
     public func setState(commandID: Int32, value: Double) {
@@ -141,6 +155,7 @@ public class ConnectAPI: NSObject {
             self.sendBool(val: true)
             self.sendDouble(val: value)
         }
+        updateState(commandID: commandID, value: value)
     }
     
     public func setState(commandID: Int32, value: Int64) {
@@ -149,6 +164,7 @@ public class ConnectAPI: NSObject {
             self.sendBool(val: true)
             self.sendLong(val: value)
         }
+        updateState(commandID: commandID, value: value)
     }
     
     public func getState(ID: Int32) {
@@ -156,6 +172,7 @@ public class ConnectAPI: NSObject {
             self.sendInt(val: ID)
             self.sendBool(val: false)
         }
+        self.requestedStates.append(TimedState(id: ID))
     }
     
     public func sendCommand(commandID: Int32) {
@@ -424,6 +441,10 @@ public class ConnectAPI: NSObject {
         return -1
     }
     
+    public func getStateByString(str: String) {
+        getState(ID: getID(str: str))
+    }
+    
     public func getStateValue(str: String) -> Any? {
         if let id = StateInfoDict[str]?.ID {
             return StateByID[id]?.value ?? nil
@@ -450,6 +471,9 @@ public class ConnectAPI: NSObject {
             StateInfoDict.removeAll()
             States.removeAll()
             StateByID.removeAll()
+            
+            requestedStates.removeAll()
+            updatedStates.removeAll()
         }
     }
     
@@ -489,6 +513,19 @@ extension ConnectAPI: StreamDelegate {
         if commandID == -1 {
             readManifest(inputStream: inputStream)
         } else {
+            
+            guard let expectedCommandIndex: Int = requestedStates.firstIndex(where: { $0.id == commandID }) else {
+                closeConnection()       // received an unrequested state
+                return
+            }
+            
+            let expectedCommand: TimedState = requestedStates[expectedCommandIndex]
+            requestedStates.remove(at: expectedCommandIndex)
+            
+            let hasBeenUpdated = updatedStates[commandID] ?? 0 >= (expectedCommand.time - 200)
+            // check if the value has been updated locally since requesting it, or within 200 ms
+            // before requesting. this allows Infinite Flight some time to process the update
+            
             let stateInfo = StateInfoByID[commandID]
             let state = StateByID[commandID]
             
@@ -497,32 +534,44 @@ extension ConnectAPI: StreamDelegate {
             if stateInfo?.type == 0 {    //bool
                 let value = readBoolean(inputStream: inputStream)
                 logger.debug("\(String(describing: stateInfo?.path)): \(value)")
-                state?.value = value as Bool
+                if !hasBeenUpdated {
+                    state?.value = value as Bool
+                }
                 
             } else if stateInfo?.type == 1 {    //int
                 let value = readInt(inputStream: inputStream)
                 logger.debug("\(String(describing: stateInfo?.path)): \(value)")
-                state?.value = value as Int32
+                if !hasBeenUpdated {
+                    state?.value = value as Int32
+                }
                 
             } else if stateInfo?.type == 2 {    //float
                 let value = readFloat(inputStream: inputStream)
                 logger.debug("\(String(describing: stateInfo?.path)): \(value)")
-                state?.value = value as Float
+                if !hasBeenUpdated {
+                    state?.value = value as Float
+                }
                 
             } else if stateInfo?.type == 3 {    //double
                 let value = readDouble(inputStream: inputStream)
                 logger.debug("\(String(describing: stateInfo?.path)): \(value)")
-                state?.value = value as Double
+                if !hasBeenUpdated {
+                    state?.value = value as Double
+                }
                 
             } else if stateInfo?.type == 4 {    //string
                 let value = readString(inputStream: inputStream)
                 logger.debug("\(String(describing: stateInfo?.path)): \(String(describing: value))")
-                state?.value = "\(value)"
+                if !hasBeenUpdated {
+                    state?.value = "\(value)"
+                }
                 
             } else if stateInfo?.type == 5 {    //long
                 let value = readLong(inputStream: inputStream)
                 logger.debug("\(String(describing: stateInfo?.path)): \(value)")
-                state?.value = value as Int64
+                if !hasBeenUpdated {
+                    state?.value = value as Int64
+                }
             } else if stateInfo?.type == -1 { //sound?
 //                let value = readString(inputStream: inputStream)
 //                if debug {
@@ -548,6 +597,10 @@ extension ConnectAPI: StreamDelegate {
             case 5: return "long"
             default: return "unknown"
         }
+    }
+    
+    private func timestampMilliseconds() -> Int {
+        return Int(1000 * Date().timeIntervalSince1970)
     }
     
 }
