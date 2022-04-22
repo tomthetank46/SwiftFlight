@@ -515,7 +515,6 @@ extension ConnectAPI: StreamDelegate {
         } else {
             
             guard let expectedCommandIndex: Int = requestedStates.firstIndex(where: { $0.id == commandID }) else {
-                print(commandID)
                 closeConnection()       // received an unrequested state
                 return
             }
