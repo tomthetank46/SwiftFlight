@@ -233,6 +233,12 @@ public class FlightControls: NSObject {
         connectAPI?.setState(commandID: landing, value: Int32(value))
     }
     
+    public func autobrakes(value: Int) {
+        if let autobrakes = connectAPI?.StateInfoDict["aircraft/0/systems/auto_brakes/command_state"]?.ID {
+            connectAPI?.setState(commandID: autobrakes, value: Int32(value))
+        }
+    }
+    
     // Autopilot
     
     public func apToggle() {
